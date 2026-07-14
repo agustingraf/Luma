@@ -395,8 +395,8 @@
    Sacás estos dos datos de tu proyecto en supabase.com:
    Settings → API → "Project URL" y "anon public" key
    ====================================================== */
-const SUPABASE_URL = 'TU_PROJECT_URL_ACA';
-const SUPABASE_ANON_KEY = 'TU_ANON_KEY_ACA';
+const SUPABASE_URL = 'https://wxvcjkpgbzlypsrcrcus.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dmNqa3BnYnpseXBzcmNyY3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5ODQ5MTUsImV4cCI6MjA5OTU2MDkxNX0.CcBPceBAxgrxe2GXVFNKbu3hVbDQRR1-fLpNZCSYrrA';
 
 const sb = (SUPABASE_URL.startsWith('http'))
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
