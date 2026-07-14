@@ -1,2 +1,971 @@
-# Luma
-pagina para organizar las clases de Luma Pilates
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luma Pilates · Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bruma:#EAEDE9;
+    --surface:#FFFFFF;
+    --ink:#24312A;
+    --ink-soft:#5B6960;
+    --plum:#6B4C5E;
+    --plum-soft:#F2E9EE;
+    --eucalipto:#4F7268;
+    --eucalipto-soft:#E7EFEC;
+    --border:#DAD7CC;
+    --suave:#D6A729;
+    --medio:#C24D3C;
+    --intenso:#3762A5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bruma);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4,.display{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace; letter-spacing:0.02em;}
+
+  #app{ display:flex; min-height:100vh; }
+
+  #sidebar{
+    width:220px; flex-shrink:0; background:var(--surface);
+    border-right:1px solid var(--border); padding:28px 18px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  #sidebar .brand{ font-size:22px; margin:0 0 4px 4px; color:var(--plum); }
+  #sidebar .brand-sub{
+    font-size:11px; color:var(--ink-soft); margin:0 0 26px 4px;
+    text-transform:uppercase; letter-spacing:0.12em;
+  }
+  .navbtn{
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px; border-radius:10px; border:none;
+    background:transparent; color:var(--ink-soft); cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:14.5px; font-weight:500;
+    text-align:left; width:100%;
+  }
+  .navbtn:hover{ background:var(--bruma); }
+  .navbtn.active{ background:var(--plum-soft); color:var(--plum); font-weight:600; }
+  .navbtn .dot{ width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.55; flex-shrink:0;}
+
+  main{ flex:1; padding:34px 40px 100px; max-width:960px; }
+  .pagehead{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px; gap:16px; flex-wrap:wrap;}
+  .pagehead h1{ font-size:26px; margin:0 0 4px; }
+  .pagehead p{ margin:0; color:var(--ink-soft); font-size:14px; }
+  .btn{
+    border:none; border-radius:10px; padding:10px 18px; font-weight:600;
+    font-size:14px; cursor:pointer; font-family:'Inter',sans-serif;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary{ background:var(--plum); color:#fff; }
+  .btn-primary:hover{ background:#5a3e4d; }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border:1px solid var(--border); }
+  .btn-ghost:hover{ background:var(--bruma); }
+  .btn-sm{ padding:6px 10px; font-size:12.5px; border-radius:8px; }
+
+  .section{ display:none; }
+  .section.active{ display:block; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 18px; margin-bottom:12px;
+  }
+  .card-row{ display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
+  .card h3{ font-size:16.5px; margin:0 0 4px; }
+  .badge{
+    display:inline-block; font-size:11px; font-weight:600; padding:3px 9px;
+    border-radius:20px; text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .badge-nivel-principiante{ background:var(--eucalipto-soft); color:var(--eucalipto); }
+  .badge-nivel-intermedio{ background:#FBEFE3; color:#9C6A28; }
+  .badge-nivel-avanzado{ background:var(--plum-soft); color:var(--plum); }
+  .meta{ color:var(--ink-soft); font-size:13px; margin-top:4px; }
+  .notas{ font-size:13px; color:var(--ink-soft); margin-top:8px; font-style:italic; }
+  .card-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .icon-btn{
+    border:none; background:transparent; color:var(--ink-soft); cursor:pointer;
+    width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{ background:var(--bruma); color:var(--ink); }
+
+  .empty{
+    text-align:center; padding:50px 20px; color:var(--ink-soft);
+    border:1px dashed var(--border); border-radius:var(--radius);
+  }
+  .empty .display{ color:var(--ink); font-size:18px; margin-bottom:6px;}
+
+  .spring{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;}
+  .spring .sw{ width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .sw-suave{ background:var(--suave); }
+  .sw-medio{ background:var(--medio); }
+  .sw-intenso{ background:var(--intenso); }
+
+  .tag{
+    display:inline-block; font-size:11.5px; background:var(--bruma); color:var(--ink-soft);
+    padding:3px 8px; border-radius:6px; margin:2px 4px 0 0;
+  }
+
+  .cat-heading{
+    font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-soft);
+    margin:22px 0 8px; font-weight:600;
+  }
+  .cat-heading:first-child{ margin-top:0; }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(36,49,42,0.35); display:none;
+    align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; z-index:50;
+  }
+  .overlay.open{ display:flex; }
+  .modal{
+    background:var(--surface); border-radius:16px; padding:26px; width:100%; max-width:440px;
+    border:1px solid var(--border);
+  }
+  .modal h2{ font-size:20px; margin:0 0 18px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--border);
+    font-family:'Inter',sans-serif; font-size:14px; background:var(--bruma); color:var(--ink);
+  }
+  .field textarea{ resize:vertical; min-height:60px; }
+  .row2{ display:flex; gap:10px; }
+  .row2 .field{ flex:1; }
+  .checkgrid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .checkgrid label{
+    display:flex; align-items:center; gap:6px; font-size:13px; background:var(--bruma);
+    padding:6px 10px; border-radius:8px; cursor:pointer; color:var(--ink-soft);
+  }
+  .checkgrid input{ width:auto; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+
+  /* Calendario */
+  .cal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .cal-header h2{ font-size:19px; margin:0; text-transform:capitalize; }
+  .cal-nav{ display:flex; gap:6px; }
+  .cal-nav button{
+    border:1px solid var(--border); background:var(--surface); color:var(--ink-soft);
+    width:34px; height:34px; border-radius:9px; cursor:pointer; font-size:15px;
+  }
+  .cal-nav button:hover{ background:var(--bruma); }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:18px; }
+  .cal-dow{ text-align:center; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); font-weight:700; padding-bottom:3px; }
+  .cal-day{
+    aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer;
+    font-size:13px; font-weight:600; color:var(--ink); position:relative; gap:3px;
+  }
+  .cal-day:hover{ border-color:var(--eucalipto); }
+  .cal-day.blank{ visibility:hidden; cursor:default; }
+  .cal-day.domingo{ opacity:0.4; }
+  .cal-day.today{ border-color:var(--eucalipto); border-width:2px; }
+  .cal-day.selected{ background:var(--plum); color:#fff; border-color:var(--plum); }
+  .cal-day .dot{ width:5px; height:5px; border-radius:50%; background:var(--eucalipto); }
+  .cal-day.selected .dot{ background:#fff; }
+
+  .horas{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:22px; }
+  .horapill{
+    flex-shrink:0; padding:9px 16px; border-radius:20px; border:1px solid var(--border);
+    background:var(--surface); color:var(--ink-soft); font-weight:600; font-size:13.5px; cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .horapill.active{ background:var(--eucalipto); color:#fff; border-color:var(--eucalipto); }
+  .horapill .n{ font-size:10.5px; opacity:0.75; margin-left:4px; }
+
+  .clase-header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;
+  }
+  .clase-header h2{ font-size:21px; margin:0; text-transform:capitalize; }
+
+  .cupo{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; padding:4px 11px;
+    border-radius:20px; flex-shrink:0; white-space:nowrap;
+  }
+  .cupo-libre{ background:var(--eucalipto-soft); color:var(--eucalipto); }
+  .cupo-lleno{ background:#FBEFE3; color:#9C6A28; }
+  .cupo-excedido{ background:var(--plum-soft); color:var(--plum); }
+
+  .planblock{ margin-bottom:28px; }
+  .planblock h3{ font-size:13px; margin:0 0 10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.08em; font-family:'Inter'; font-weight:700;}
+
+  .chiprow{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; min-height:4px; }
+  .alumna-chip{
+    display:inline-flex; align-items:center; gap:8px; background:var(--plum-soft); color:var(--plum);
+    border-radius:20px; padding:7px 8px 7px 14px; font-size:13.5px; font-weight:600;
+  }
+  .alumna-chip button{
+    border:none; background:rgba(107,76,94,0.12); color:var(--plum); cursor:pointer;
+    width:19px; height:19px; border-radius:50%; font-size:11px; line-height:1;
+  }
+  .rutina-chip{
+    display:inline-flex; align-items:center; gap:8px; background:var(--bruma);
+    border-radius:20px; padding:7px 8px 7px 14px; font-size:13.5px;
+  }
+  .rutina-chip .ops{ display:flex; gap:2px; }
+  .rutina-chip button{
+    border:none; background:transparent; color:var(--ink-soft); cursor:pointer; font-size:12px; padding:2px 4px;
+  }
+  .rutina-chip button:hover{ color:var(--plum); }
+
+  .pool{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pool-item{
+    display:flex; align-items:center; gap:6px; padding:8px 12px;
+    border-radius:20px; background:var(--surface); border:1px solid var(--border); cursor:pointer; font-size:13.5px;
+  }
+  .pool-item:hover{ background:var(--eucalipto-soft); border-color:var(--eucalipto); }
+  .pool-item[draggable="true"]{ cursor:grab; }
+
+  .dropzone{
+    border:1.5px dashed var(--border); border-radius:12px; padding:12px; margin-bottom:14px; transition:border-color .15s, background .15s;
+  }
+  .dropzone.drag-over{ border-color:var(--eucalipto); background:var(--eucalipto-soft); }
+
+  #bottomnav{ display:none; }
+  @media (max-width: 760px){
+    #sidebar{ display:none; }
+    main{ padding:22px 16px 90px; }
+    #bottomnav{
+      display:flex; position:fixed; bottom:0; left:0; right:0; background:var(--surface);
+      border-top:1px solid var(--border); z-index:40;
+    }
+    #bottomnav button{
+      flex:1; border:none; background:transparent; padding:12px 4px 10px; color:var(--ink-soft);
+      font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:4px;
+    }
+    #bottomnav button.active{ color:var(--plum); }
+    #bottomnav .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav id="sidebar">
+    <div class="brand display">Luma</div>
+    <div class="brand-sub">panel de pilates</div>
+    <button class="navbtn active" data-section="plan"><span class="dot"></span>Planificador</button>
+    <button class="navbtn" data-section="alumnas"><span class="dot"></span>Alumnas</button>
+    <button class="navbtn" data-section="ejercicios"><span class="dot"></span>Ejercicios</button>
+  </nav>
+
+  <main>
+    <!-- PLANIFICADOR -->
+    <section class="section active" id="sec-plan">
+      <div class="pagehead">
+        <div>
+          <h1>Planificador</h1>
+          <p>Elegí una fecha del calendario, cargá hasta 5 alumnas en esa clase y armá la rutina.</p>
+        </div>
+      </div>
+      <div id="calendario"></div>
+      <div class="horas" id="horas-selector"></div>
+      <div id="plan-contenido"></div>
+    </section>
+
+    <!-- ALUMNAS -->
+    <section class="section" id="sec-alumnas">
+      <div class="pagehead">
+        <div>
+          <h1>Alumnas</h1>
+          <p>Ficha de cada alumna, con el historial de clases que se va guardando solo.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-alumna">+ Nueva alumna</button>
+      </div>
+      <div id="lista-alumnas"></div>
+    </section>
+
+    <!-- EJERCICIOS -->
+    <section class="section" id="sec-ejercicios">
+      <div class="pagehead">
+        <div>
+          <h1>Ejercicios</h1>
+          <p>Banco de ejercicios, organizado por categoría.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-add-ejercicio">+ Nuevo ejercicio</button>
+      </div>
+      <div id="lista-ejercicios"></div>
+    </section>
+  </main>
+</div>
+
+<div id="bottomnav">
+  <button class="active" data-section="plan"><span class="dot"></span>Plan</button>
+  <button data-section="alumnas"><span class="dot"></span>Alumnas</button>
+  <button data-section="ejercicios"><span class="dot"></span>Ejercicios</button>
+</div>
+
+<!-- Modal alumna -->
+<div class="overlay" id="overlay-alumna">
+  <div class="modal">
+    <h2 id="modal-alumna-title">Nueva alumna</h2>
+    <input type="hidden" id="alumna-id">
+    <div class="field">
+      <label>Nombre</label>
+      <input type="text" id="alumna-nombre" placeholder="Ej: Marina Sosa">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Nivel</label>
+        <select id="alumna-nivel">
+          <option value="Principiante">Principiante</option>
+          <option value="Intermedio">Intermedio</option>
+          <option value="Avanzado">Avanzado</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Teléfono (opcional)</label>
+        <input type="text" id="alumna-telefono" placeholder="Ej: 11 5555-5555">
+      </div>
+    </div>
+    <div class="field">
+      <label>Notas</label>
+      <textarea id="alumna-notas" placeholder="Lesiones, objetivos, observaciones..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancel-alumna">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-alumna">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ejercicio -->
+<div class="overlay" id="overlay-ejercicio">
+  <div class="modal">
+    <h2 id="modal-ejercicio-title">Nuevo ejercicio</h2>
+    <input type="hidden" id="ejercicio-id">
+    <div class="field">
+      <label>Nombre</label>
+      <input type="text" id="ejercicio-nombre" placeholder="Ej: The Hundred">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="ejercicio-categoria">
+          <option>Core</option><option>Movilidad</option><option>Fuerza</option>
+          <option>Respiración</option><option>Postura</option><option>Cardio suave</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Resorte / intensidad</label>
+        <select id="ejercicio-resorte">
+          <option value="suave">Suave (amarillo)</option>
+          <option value="medio">Medio (rojo)</option>
+          <option value="intenso">Intenso (azul)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Equipo</label>
+      <div class="checkgrid" id="ejercicio-equipo-grid">
+        <label><input type="checkbox" value="Mat"> Mat</label>
+        <label><input type="checkbox" value="Reformer"> Reformer</label>
+        <label><input type="checkbox" value="Bandas"> Bandas</label>
+        <label><input type="checkbox" value="Círculo"> Círculo</label>
+        <label><input type="checkbox" value="Pesas"> Pesas</label>
+        <label><input type="checkbox" value="Fitball"> Fitball</label>
+        <label><input type="checkbox" value="Silla"> Silla</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cue / notas de ejecución</label>
+      <textarea id="ejercicio-cue" placeholder="Indicaciones clave para dar el ejercicio..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancel-ejercicio">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-ejercicio">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ======================================================
+   CONFIGURACIÓN DE SUPABASE — completar antes de publicar
+   Sacás estos dos datos de tu proyecto en supabase.com:
+   Settings → API → "Project URL" y "anon public" key
+   ====================================================== */
+const SUPABASE_URL = 'TU_PROJECT_URL_ACA';
+const SUPABASE_ANON_KEY = 'TU_ANON_KEY_ACA';
+
+const sb = (SUPABASE_URL.startsWith('http'))
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+async function dbGet(key){
+  if(!sb) return null;
+  try{
+    const { data, error } = await sb.from('luma_data').select('value').eq('key', key).maybeSingle();
+    if(error) throw error;
+    return data ? data.value : null;
+  }catch(e){ console.error('Error leyendo', key, e); return null; }
+}
+async function dbSet(key, value){
+  if(!sb) return;
+  try{
+    const { error } = await sb.from('luma_data').upsert({ key, value, updated_at: new Date().toISOString() });
+    if(error) throw error;
+  }catch(e){
+    console.error('Error guardando', key, e);
+    alert('No se pudo guardar en la base de datos. Revisá tu conexión a internet.');
+  }
+}
+</script>
+<script>
+const DIAS_SEMANA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']; // índice = Date.getDay()
+const HORARIOS_SEMANA = ['16:00','17:00','18:00','19:00'];   // Lunes a Viernes
+const HORARIOS_SABADO = ['09:00','10:00','11:00','12:00','13:00'];
+const CUPO_POR_CLASE = 5;
+
+function horariosDe(diaSemanaNombre){
+  if(diaSemanaNombre==='Sábado') return HORARIOS_SABADO;
+  if(diaSemanaNombre==='Domingo') return [];
+  return HORARIOS_SEMANA;
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function fechaISO(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+function claveClase(fecha,hora){ return fecha+'|'+hora; }
+function esFechaISO(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+
+const hoy = new Date();
+const hoyISO = fechaISO(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+let alumnas = [];
+let ejercicios = [];
+let clases = {}; // clave "YYYY-MM-DD|HH:MM" -> { alumnas:[id,...], rutina:[id,...], notas:'' }
+let calYear = hoy.getFullYear();
+let calMonth = hoy.getMonth();
+let fechaSeleccionada = hoyISO;
+let horaSeleccionada = null;
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function getClase(fecha,hora){
+  const k = claveClase(fecha,hora);
+  return clases[k] || {alumnas:[], rutina:[], notas:''};
+}
+function ensureClase(fecha,hora){
+  const k = claveClase(fecha,hora);
+  if(!clases[k]) clases[k] = {alumnas:[], rutina:[], notas:''};
+  return clases[k];
+}
+function diaSemanaDeFecha(fechaISOStr){
+  const [y,m,d] = fechaISOStr.split('-').map(Number);
+  return DIAS_SEMANA[new Date(y, m-1, d).getDay()];
+}
+
+async function loadAll(){
+  if(!sb){ return; } // sin configurar todavía — se avisa en init()
+  alumnas = (await dbGet('alumnas')) || [];
+  ejercicios = (await dbGet('ejercicios')) || [];
+  clases = (await dbGet('clases')) || {};
+
+  let cambios = false;
+
+  // migración 1: clases viejas guardadas por día de semana recurrente (ej "Miércoles|17:00")
+  // pasan a la próxima fecha real que corresponda a ese día.
+  Object.keys(clases).forEach(k=>{
+    const [parte1, hora] = k.split('|');
+    if(!esFechaISO(parte1)){
+      const nuevaFecha = proximaFechaParaDia(parte1);
+      if(nuevaFecha){
+        const destino = ensureClase(nuevaFecha, hora);
+        const origen = clases[k];
+        (origen.alumnas||[]).forEach(id=>{ if(!destino.alumnas.includes(id)) destino.alumnas.push(id); });
+        (origen.rutina||[]).forEach(id=>{ if(!destino.rutina.includes(id)) destino.rutina.push(id); });
+        if(origen.notas && !destino.notas) destino.notas = origen.notas;
+      }
+      delete clases[k];
+      cambios = true;
+    }
+  });
+
+  // migración 2: historial viejo guardado directo en cada alumna pasa a integrarse en "clases"
+  alumnas.forEach(a=>{
+    if(a.historial && a.historial.length){
+      a.historial.forEach(h=>{
+        if(!h.fecha || !h.hora) return;
+        const c = ensureClase(h.fecha, h.hora);
+        if(!c.alumnas.includes(a.id)) c.alumnas.push(a.id);
+        (h.ejercicios||[]).forEach(eid=>{ if(!c.rutina.includes(eid)) c.rutina.push(eid); });
+      });
+      delete a.historial;
+      cambios = true;
+    }
+    delete a.turnos; delete a.dia; delete a.hora; delete a.ejercicios;
+  });
+
+  if(cambios){ await saveAlumnas(); await saveClases(); }
+}
+function proximaFechaParaDia(diaNombre){
+  const idx = DIAS_SEMANA.indexOf(diaNombre);
+  if(idx<0) return null;
+  let d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  for(let i=0;i<8;i++){
+    if(d.getDay()===idx) return fechaISO(d.getFullYear(), d.getMonth(), d.getDate());
+    d.setDate(d.getDate()+1);
+  }
+  return hoyISO;
+}
+async function saveAlumnas(){ await dbSet('alumnas', alumnas); }
+async function saveEjercicios(){ await dbSet('ejercicios', ejercicios); }
+async function saveClases(){ await dbSet('clases', clases); }
+
+/* ---------- NAV ---------- */
+function goSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.section===name));
+  document.querySelectorAll('#bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.section===name));
+}
+document.querySelectorAll('.navbtn, #bottomnav button').forEach(b=>{
+  b.addEventListener('click', ()=>goSection(b.dataset.section));
+});
+
+/* ---------- ALUMNAS ---------- */
+function clasesDeAlumna(alumnaId){
+  const out = [];
+  Object.keys(clases).forEach(k=>{
+    if(clases[k].alumnas.includes(alumnaId)){
+      const [fecha,hora] = k.split('|');
+      out.push({fecha, hora, clave:k, rutina: clases[k].rutina||[]});
+    }
+  });
+  out.sort((a,b)=> b.fecha.localeCompare(a.fecha) || a.hora.localeCompare(b.hora));
+  return out;
+}
+let historialAbierto = new Set();
+function toggleHistorial(id){
+  if(historialAbierto.has(id)) historialAbierto.delete(id); else historialAbierto.add(id);
+  renderAlumnas();
+}
+function renderAlumnas(){
+  const list = document.getElementById('lista-alumnas');
+  if(alumnas.length===0){
+    list.innerHTML = `<div class="empty"><div class="display">Todavía no hay alumnas cargadas</div>Sumá la primera con "Nueva alumna".</div>`;
+    return;
+  }
+  const ordenadas = [...alumnas].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  list.innerHTML = ordenadas.map(a=>{
+    const historial = clasesDeAlumna(a.id);
+    const abierto = historialAbierto.has(a.id);
+    const historialHtml = !abierto ? '' : (historial.length===0
+      ? `<div class="meta" style="margin-top:8px;">Todavía no hay clases registradas para esta alumna.</div>`
+      : `<div style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">` +
+        historial.map(h=>{
+          const nombres = (h.rutina||[]).map(eid=>{
+            const e = ejercicios.find(x=>x.id===eid);
+            return e ? escapeHtml(e.nombre) : null;
+          }).filter(Boolean).join(', ') || 'Sin ejercicios registrados';
+          const [y,m,d] = h.fecha.split('-');
+          return `<div style="margin-bottom:8px;">
+            <span class="mono" style="font-size:12.5px; color:var(--plum); font-weight:600;">${d}/${m}/${y}</span>
+            <span class="meta" style="margin:0;"> · ${diaSemanaDeFecha(h.fecha)} ${h.hora}</span>
+            <button class="icon-btn" style="width:20px;height:20px;float:right;" onclick="quitarDeClaseHistorial('${a.id}','${h.clave}')" title="Sacar de esta clase">✕</button>
+            <div style="font-size:13px; margin-top:2px;">${nombres}</div>
+          </div>`;
+        }).join('') + `</div>`);
+    return `
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <h3>${escapeHtml(a.nombre)}</h3>
+          <span class="badge badge-nivel-${a.nivel.toLowerCase()}">${a.nivel}</span>
+          ${a.telefono? `<span class="meta">${escapeHtml(a.telefono)}</span>`:''}
+          ${a.notas? `<div class="notas">${escapeHtml(a.notas)}</div>` : ''}
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="toggleHistorial('${a.id}')">${abierto?'Ocultar':'Ver'} historial (${historial.length})</button>
+          ${historialHtml}
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn" onclick="editAlumna('${a.id}')" title="Editar">✎</button>
+          <button class="icon-btn" onclick="deleteAlumna('${a.id}')" title="Eliminar">✕</button>
+        </div>
+      </div>
+    </div>
+  `;}).join('');
+}
+window.quitarDeClaseHistorial = async function(alumnaId, clave){
+  if(!confirm('¿Sacar a esta alumna de ese registro de clase?')) return;
+  if(clases[clave]){
+    clases[clave].alumnas = clases[clave].alumnas.filter(id=>id!==alumnaId);
+    await saveClases();
+  }
+  renderAlumnas(); renderPlan(); renderCalendario();
+}
+function openAlumnaModal(){ document.getElementById('overlay-alumna').classList.add('open'); }
+function closeAlumnaModal(){ document.getElementById('overlay-alumna').classList.remove('open'); }
+document.getElementById('btn-add-alumna').addEventListener('click', ()=>{
+  document.getElementById('modal-alumna-title').textContent = 'Nueva alumna';
+  document.getElementById('alumna-id').value='';
+  document.getElementById('alumna-nombre').value='';
+  document.getElementById('alumna-nivel').value='Principiante';
+  document.getElementById('alumna-telefono').value='';
+  document.getElementById('alumna-notas').value='';
+  openAlumnaModal();
+});
+document.getElementById('btn-cancel-alumna').addEventListener('click', closeAlumnaModal);
+window.editAlumna = function(id){
+  const a = alumnas.find(x=>x.id===id); if(!a) return;
+  document.getElementById('modal-alumna-title').textContent = 'Editar alumna';
+  document.getElementById('alumna-id').value=a.id;
+  document.getElementById('alumna-nombre').value=a.nombre;
+  document.getElementById('alumna-nivel').value=a.nivel;
+  document.getElementById('alumna-telefono').value=a.telefono||'';
+  document.getElementById('alumna-notas').value=a.notas||'';
+  openAlumnaModal();
+}
+window.deleteAlumna = async function(id){
+  if(!confirm('¿Eliminar esta alumna? También se va a sacar de las clases en las que estaba anotada.')) return;
+  alumnas = alumnas.filter(a=>a.id!==id);
+  Object.keys(clases).forEach(k=>{ clases[k].alumnas = clases[k].alumnas.filter(aid=>aid!==id); });
+  await saveAlumnas(); await saveClases();
+  renderAlumnas(); renderPlan(); renderCalendario();
+}
+document.getElementById('btn-save-alumna').addEventListener('click', async ()=>{
+  const nombre = document.getElementById('alumna-nombre').value.trim();
+  if(!nombre){ alert('Poné un nombre.'); return; }
+  const id = document.getElementById('alumna-id').value || uid();
+  const data = {
+    id, nombre,
+    nivel: document.getElementById('alumna-nivel').value,
+    telefono: document.getElementById('alumna-telefono').value.trim(),
+    notas: document.getElementById('alumna-notas').value.trim(),
+  };
+  const idx = alumnas.findIndex(a=>a.id===id);
+  if(idx>=0) alumnas[idx]=data; else alumnas.push(data);
+  await saveAlumnas();
+  renderAlumnas(); renderPlan();
+  closeAlumnaModal();
+});
+
+/* ---------- EJERCICIOS ---------- */
+function springLabel(r){
+  return r==='suave' ? '<span class="spring"><span class="sw sw-suave"></span>Suave</span>'
+    : r==='medio' ? '<span class="spring"><span class="sw sw-medio"></span>Medio</span>'
+    : '<span class="spring"><span class="sw sw-intenso"></span>Intenso</span>';
+}
+function renderEjercicios(){
+  const list = document.getElementById('lista-ejercicios');
+  if(ejercicios.length===0){
+    list.innerHTML = `<div class="empty"><div class="display">El banco de ejercicios está vacío</div>Cargá el primero con "Nuevo ejercicio".</div>`;
+    return;
+  }
+  const categorias = [...new Set(ejercicios.map(e=>e.categoria))];
+  list.innerHTML = categorias.map(cat=>{
+    const items = ejercicios.filter(e=>e.categoria===cat);
+    return `<div class="cat-heading">${cat}</div>` + items.map(e=>`
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <h3>${escapeHtml(e.nombre)}</h3>
+            ${springLabel(e.resorte)}
+            <div>${(e.equipo||[]).map(eq=>`<span class="tag">${escapeHtml(eq)}</span>`).join('')}</div>
+            ${e.cue? `<div class="notas">${escapeHtml(e.cue)}</div>`:''}
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn" onclick="editEjercicio('${e.id}')" title="Editar">✎</button>
+            <button class="icon-btn" onclick="deleteEjercicio('${e.id}')" title="Eliminar">✕</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }).join('');
+}
+function openEjercicioModal(){ document.getElementById('overlay-ejercicio').classList.add('open'); }
+function closeEjercicioModal(){ document.getElementById('overlay-ejercicio').classList.remove('open'); }
+document.getElementById('btn-add-ejercicio').addEventListener('click', ()=>{
+  document.getElementById('modal-ejercicio-title').textContent = 'Nuevo ejercicio';
+  document.getElementById('ejercicio-id').value='';
+  document.getElementById('ejercicio-nombre').value='';
+  document.getElementById('ejercicio-categoria').value='Core';
+  document.getElementById('ejercicio-resorte').value='suave';
+  document.querySelectorAll('#ejercicio-equipo-grid input').forEach(c=>c.checked=false);
+  document.getElementById('ejercicio-cue').value='';
+  openEjercicioModal();
+});
+document.getElementById('btn-cancel-ejercicio').addEventListener('click', closeEjercicioModal);
+window.editEjercicio = function(id){
+  const e = ejercicios.find(x=>x.id===id); if(!e) return;
+  document.getElementById('modal-ejercicio-title').textContent = 'Editar ejercicio';
+  document.getElementById('ejercicio-id').value=e.id;
+  document.getElementById('ejercicio-nombre').value=e.nombre;
+  document.getElementById('ejercicio-categoria').value=e.categoria;
+  document.getElementById('ejercicio-resorte').value=e.resorte;
+  document.querySelectorAll('#ejercicio-equipo-grid input').forEach(c=>{ c.checked = (e.equipo||[]).includes(c.value); });
+  document.getElementById('ejercicio-cue').value=e.cue||'';
+  openEjercicioModal();
+}
+window.deleteEjercicio = async function(id){
+  if(!confirm('¿Eliminar este ejercicio?')) return;
+  ejercicios = ejercicios.filter(e=>e.id!==id);
+  Object.keys(clases).forEach(k=>{ clases[k].rutina = clases[k].rutina.filter(rid=>rid!==id); });
+  await saveEjercicios(); await saveClases();
+  renderEjercicios(); renderPlan();
+}
+document.getElementById('btn-save-ejercicio').addEventListener('click', async ()=>{
+  const nombre = document.getElementById('ejercicio-nombre').value.trim();
+  if(!nombre){ alert('Poné un nombre.'); return; }
+  const id = document.getElementById('ejercicio-id').value || uid();
+  const equipo = [...document.querySelectorAll('#ejercicio-equipo-grid input:checked')].map(c=>c.value);
+  const data = {
+    id, nombre,
+    categoria: document.getElementById('ejercicio-categoria').value,
+    resorte: document.getElementById('ejercicio-resorte').value,
+    equipo,
+    cue: document.getElementById('ejercicio-cue').value.trim(),
+  };
+  const idx = ejercicios.findIndex(e=>e.id===id);
+  if(idx>=0) ejercicios[idx]=data; else ejercicios.push(data);
+  await saveEjercicios();
+  renderEjercicios(); renderPlan();
+  closeEjercicioModal();
+});
+
+/* ---------- CALENDARIO / PLANIFICADOR ---------- */
+function renderCalendario(){
+  const cont = document.getElementById('calendario');
+  const titulo = new Date(calYear, calMonth, 1).toLocaleDateString('es-AR',{month:'long', year:'numeric'});
+  const firstDow = (new Date(calYear, calMonth, 1).getDay()+6)%7; // 0=Lunes
+  const diasEnMes = new Date(calYear, calMonth+1, 0).getDate();
+
+  let celdas = '';
+  for(let i=0;i<firstDow;i++) celdas += `<div class="cal-day blank"></div>`;
+  for(let d=1; d<=diasEnMes; d++){
+    const iso = fechaISO(calYear, calMonth, d);
+    const dowIdx = new Date(calYear, calMonth, d).getDay();
+    const esDomingo = dowIdx===0;
+    const tieneClases = Object.keys(clases).some(k=>k.startsWith(iso+'|') && clases[k].alumnas.length>0);
+    const clasesCss = ['cal-day'];
+    if(esDomingo) clasesCss.push('domingo');
+    if(iso===hoyISO) clasesCss.push('today');
+    if(iso===fechaSeleccionada) clasesCss.push('selected');
+    celdas += `<div class="${clasesCss.join(' ')}" onclick="seleccionarFecha('${iso}')">${d}${tieneClases?'<span class="dot"></span>':''}</div>`;
+  }
+
+  cont.innerHTML = `
+    <div class="cal-header">
+      <h2>${titulo}</h2>
+      <div class="cal-nav">
+        <button onclick="cambiarMes(-1)" title="Mes anterior">‹</button>
+        <button onclick="cambiarMes(1)" title="Mes siguiente">›</button>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-dow">Lun</div><div class="cal-dow">Mar</div><div class="cal-dow">Mié</div>
+      <div class="cal-dow">Jue</div><div class="cal-dow">Vie</div><div class="cal-dow">Sáb</div><div class="cal-dow">Dom</div>
+      ${celdas}
+    </div>
+  `;
+}
+function cambiarMes(delta){
+  calMonth += delta;
+  if(calMonth<0){ calMonth=11; calYear--; }
+  if(calMonth>11){ calMonth=0; calYear++; }
+  renderCalendario();
+}
+function seleccionarFecha(iso){
+  fechaSeleccionada = iso;
+  const horas = horariosDe(diaSemanaDeFecha(iso));
+  horaSeleccionada = horas.length ? horas[0] : null;
+  renderCalendario(); renderHorasSelector(); renderPlan();
+}
+
+function renderHorasSelector(){
+  const cont = document.getElementById('horas-selector');
+  const horas = horariosDe(diaSemanaDeFecha(fechaSeleccionada));
+  if(horas.length===0){
+    cont.innerHTML = '';
+    return;
+  }
+  cont.innerHTML = horas.map(h=>{
+    const n = getClase(fechaSeleccionada,h).alumnas.length;
+    return `<button class="horapill ${h===horaSeleccionada?'active':''}" data-hora="${h}">${h}<span class="n">${n}/${CUPO_POR_CLASE}</span></button>`;
+  }).join('');
+  cont.querySelectorAll('.horapill').forEach(b=>{
+    b.addEventListener('click', ()=>{ horaSeleccionada = b.dataset.hora; renderHorasSelector(); renderPlan(); });
+  });
+}
+
+function renderPlan(){
+  const cont = document.getElementById('plan-contenido');
+  const diaSemana = diaSemanaDeFecha(fechaSeleccionada);
+
+  if(diaSemana==='Domingo'){
+    cont.innerHTML = `<div class="empty"><div class="display">No trabajás los domingos</div>Elegí otro día del calendario.</div>`;
+    return;
+  }
+  if(!horaSeleccionada){
+    cont.innerHTML = `<div class="empty">Elegí un horario arriba.</div>`;
+    return;
+  }
+
+  const clase = getClase(fechaSeleccionada, horaSeleccionada);
+  const n = clase.alumnas.length;
+  const cupoClase = n < CUPO_POR_CLASE ? 'cupo-libre' : n === CUPO_POR_CLASE ? 'cupo-lleno' : 'cupo-excedido';
+
+  const asignadasHtml = clase.alumnas.map(id=>{
+    const a = alumnas.find(x=>x.id===id);
+    if(!a) return '';
+    return `<span class="alumna-chip">${escapeHtml(a.nombre)}<button onclick="quitarAlumnaDeClase('${id}')" title="Sacar de la clase">✕</button></span>`;
+  }).join('') || `<div class="meta">Todavía no cargaste alumnas en esta clase.</div>`;
+
+  const disponibles = alumnas.filter(a=>!clase.alumnas.includes(a.id));
+  const poolAlumnasHtml = disponibles.length
+    ? disponibles.map(a=>`<div class="pool-item" onclick="agregarAlumnaAClase('${a.id}')">${escapeHtml(a.nombre)} <span class="meta" style="margin:0;">${a.nivel}</span></div>`).join('')
+    : `<div class="meta">No quedan más alumnas cargadas para sumar.</div>`;
+
+  const rutinaHtml = clase.rutina.map((id,i)=>{
+    const e = ejercicios.find(x=>x.id===id);
+    if(!e) return '';
+    return `<span class="rutina-chip"><b class="mono">${i+1}.</b> ${escapeHtml(e.nombre)} ${springLabel(e.resorte)}
+      <span class="ops">
+        <button onclick="moverEjercicio('${id}',-1)" title="Subir">↑</button>
+        <button onclick="moverEjercicio('${id}',1)" title="Bajar">↓</button>
+        <button onclick="quitarEjercicioDeClase('${id}')" title="Quitar">✕</button>
+      </span>
+    </span>`;
+  }).join('') || `<div class="meta">Todavía no armaste la rutina de esta clase.</div>`;
+
+  const categorias = [...new Set(ejercicios.map(e=>e.categoria))];
+  let poolEjerciciosHtml = '';
+  if(ejercicios.length===0){
+    poolEjerciciosHtml = `<div class="meta">Cargá ejercicios en la sección "Ejercicios" primero.</div>`;
+  }else{
+    poolEjerciciosHtml = categorias.map(cat=>{
+      const items = ejercicios.filter(e=>e.categoria===cat && !clase.rutina.includes(e.id));
+      if(items.length===0) return '';
+      return `<div class="cat-heading" style="margin:14px 0 6px;">${cat}</div><div class="pool">` + items.map(e=>`
+        <div class="pool-item" draggable="true" ondragstart="onDragStartEjercicio(event,'${e.id}')" onclick="agregarEjercicioAClase('${e.id}')">
+          ${escapeHtml(e.nombre)} ${springLabel(e.resorte)}
+        </div>`).join('') + `</div>`;
+    }).join('');
+  }
+
+  const [y,m,d] = fechaSeleccionada.split('-');
+  const tituloFecha = new Date(Number(y),Number(m)-1,Number(d)).toLocaleDateString('es-AR',{weekday:'long', day:'numeric', month:'long'});
+
+  cont.innerHTML = `
+    <div class="clase-header">
+      <h2>${tituloFecha} · ${horaSeleccionada}</h2>
+      <span class="cupo ${cupoClase}">${n}/${CUPO_POR_CLASE} alumnas</span>
+    </div>
+
+    <div class="planblock">
+      <h3>Alumnas en esta clase</h3>
+      <div class="chiprow">${asignadasHtml}</div>
+      <div class="cat-heading" style="margin-top:6px;">Agregar alumna</div>
+      <div class="pool">${poolAlumnasHtml}</div>
+    </div>
+
+    <div class="planblock">
+      <h3>Rutina de la clase</h3>
+      <div class="dropzone" id="rutina-dropzone"
+           ondragover="event.preventDefault(); event.currentTarget.classList.add('drag-over')"
+           ondragleave="event.currentTarget.classList.remove('drag-over')"
+           ondrop="onDropRutina(event)">
+        <div class="chiprow">${rutinaHtml}</div>
+      </div>
+      <div class="cat-heading" style="margin-top:6px;">Banco de ejercicios (arrastrá o tocá para agregar)</div>
+      ${poolEjerciciosHtml}
+    </div>
+
+    <div class="field">
+      <label>Notas de la clase</label>
+      <textarea id="clase-notas" placeholder="Observaciones para esta clase...">${escapeHtml(clase.notas||'')}</textarea>
+    </div>
+  `;
+
+  document.getElementById('clase-notas').addEventListener('change', async (e)=>{
+    const c = ensureClase(fechaSeleccionada, horaSeleccionada);
+    c.notas = e.target.value.trim();
+    await saveClases();
+  });
+}
+
+async function agregarAlumnaAClase(alumnaId){
+  const c = getClase(fechaSeleccionada, horaSeleccionada);
+  if(c.alumnas.length >= CUPO_POR_CLASE){
+    const seguir = confirm(`Esta clase ya tiene ${c.alumnas.length}/${CUPO_POR_CLASE} alumnas. ¿Agregar igual?`);
+    if(!seguir) return;
+  }
+  const clase = ensureClase(fechaSeleccionada, horaSeleccionada);
+  if(!clase.alumnas.includes(alumnaId)) clase.alumnas.push(alumnaId);
+  await saveClases();
+  renderPlan(); renderHorasSelector(); renderAlumnas(); renderCalendario();
+}
+async function quitarAlumnaDeClase(alumnaId){
+  const clase = ensureClase(fechaSeleccionada, horaSeleccionada);
+  clase.alumnas = clase.alumnas.filter(id=>id!==alumnaId);
+  await saveClases();
+  renderPlan(); renderHorasSelector(); renderAlumnas(); renderCalendario();
+}
+async function agregarEjercicioAClase(ejercicioId){
+  const clase = ensureClase(fechaSeleccionada, horaSeleccionada);
+  if(!clase.rutina.includes(ejercicioId)) clase.rutina.push(ejercicioId);
+  await saveClases();
+  renderPlan();
+}
+async function quitarEjercicioDeClase(ejercicioId){
+  const clase = ensureClase(fechaSeleccionada, horaSeleccionada);
+  clase.rutina = clase.rutina.filter(id=>id!==ejercicioId);
+  await saveClases();
+  renderPlan();
+}
+async function moverEjercicio(ejercicioId, dir){
+  const clase = ensureClase(fechaSeleccionada, horaSeleccionada);
+  const i = clase.rutina.indexOf(ejercicioId);
+  const j = i+dir;
+  if(i<0 || j<0 || j>=clase.rutina.length) return;
+  [clase.rutina[i], clase.rutina[j]] = [clase.rutina[j], clase.rutina[i]];
+  await saveClases();
+  renderPlan();
+}
+function onDragStartEjercicio(ev, id){ ev.dataTransfer.setData('text/plain', id); }
+function onDropRutina(ev){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('drag-over');
+  const id = ev.dataTransfer.getData('text/plain');
+  if(id) agregarEjercicioAClase(id);
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------- INIT ---------- */
+(async function init(){
+  if(!sb){
+    document.getElementById('app').style.display = 'none';
+    document.body.insertAdjacentHTML('beforeend', `
+      <div style="max-width:520px; margin:60px auto; padding:28px; background:#fff; border:1px solid var(--border); border-radius:16px; font-family:'Inter',sans-serif;">
+        <h2 style="font-family:'Fraunces',serif; margin-top:0;">Falta conectar la base de datos</h2>
+        <p style="color:var(--ink-soft); line-height:1.5;">
+          Este archivo todavía tiene los datos de Supabase sin completar. Abrí el archivo, buscá
+          <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> cerca del principio del código,
+          y reemplazalos por los datos de tu proyecto (Settings → API en supabase.com).
+        </p>
+      </div>
+    `);
+    return;
+  }
+  await loadAll();
+  horaSeleccionada = (horariosDe(diaSemanaDeFecha(fechaSeleccionada))[0]) || null;
+  renderAlumnas();
+  renderEjercicios();
+  renderCalendario();
+  renderHorasSelector();
+  renderPlan();
+})();
+</script>
+</body>
+</html>
