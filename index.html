@@ -17,9 +17,11 @@
     --eucalipto:#4F7268;
     --eucalipto-soft:#E7EFEC;
     --border:#DAD7CC;
-    --suave:#D6A729;
-    --medio:#C24D3C;
-    --intenso:#3762A5;
+    --amarillo:#D6A729;
+    --azul:#3762A5;
+    --rojo:#C24D3C;
+    --doble-rojo:#7A1F1F;
+    --verde:#4F8B57;
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -108,9 +110,11 @@
 
   .spring{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;}
   .spring .sw{ width:9px; height:9px; border-radius:50%; display:inline-block;}
-  .sw-suave{ background:var(--suave); }
-  .sw-medio{ background:var(--medio); }
-  .sw-intenso{ background:var(--intenso); }
+  .sw-amarillo{ background:var(--amarillo); }
+  .sw-azul{ background:var(--azul); }
+  .sw-rojo{ background:var(--rojo); }
+  .sw-doble-rojo{ background:var(--doble-rojo); }
+  .sw-verde{ background:var(--verde); }
 
   .tag{
     display:inline-block; font-size:11.5px; background:var(--bruma); color:var(--ink-soft);
@@ -348,37 +352,52 @@
       <label>Nombre</label>
       <input type="text" id="ejercicio-nombre" placeholder="Ej: The Hundred">
     </div>
-    <div class="row2">
-      <div class="field">
-        <label>Categoría</label>
-        <select id="ejercicio-categoria">
-          <option>Core</option><option>Movilidad</option><option>Fuerza</option>
-          <option>Respiración</option><option>Postura</option><option>Cardio suave</option>
-        </select>
+    <div class="field">
+      <label>Categoría</label>
+      <div class="checkgrid" id="ejercicio-categoria-grid">
+        <label><input type="checkbox" value="Core"> Core</label>
+        <label><input type="checkbox" value="Piernas"> Piernas</label>
+        <label><input type="checkbox" value="Brazos"> Brazos</label>
+        <label><input type="checkbox" value="Estabilidad"> Estabilidad</label>
+        <label><input type="checkbox" value="Fuerza"> Fuerza</label>
+        <label><input type="checkbox" value="Coordinación"> Coordinación</label>
+        <label><input type="checkbox" value="Flexibilidad"> Flexibilidad</label>
       </div>
-      <div class="field">
-        <label>Resorte / intensidad</label>
-        <select id="ejercicio-resorte">
-          <option value="suave">Suave (amarillo)</option>
-          <option value="medio">Medio (rojo)</option>
-          <option value="intenso">Intenso (azul)</option>
-        </select>
+    </div>
+    <div class="field">
+      <label>Nivel</label>
+      <div class="checkgrid" id="ejercicio-nivel-grid">
+        <label><input type="checkbox" value="Base"> Base</label>
+        <label><input type="checkbox" value="Progreso"> Progreso</label>
+        <label><input type="checkbox" value="Desafío"> Desafío</label>
       </div>
     </div>
     <div class="field">
       <label>Equipo</label>
       <div class="checkgrid" id="ejercicio-equipo-grid">
-        <label><input type="checkbox" value="Mat"> Mat</label>
-        <label><input type="checkbox" value="Reformer"> Reformer</label>
-        <label><input type="checkbox" value="Bandas"> Bandas</label>
-        <label><input type="checkbox" value="Círculo"> Círculo</label>
-        <label><input type="checkbox" value="Pesas"> Pesas</label>
-        <label><input type="checkbox" value="Fitball"> Fitball</label>
-        <label><input type="checkbox" value="Silla"> Silla</label>
+        <label><input type="checkbox" value="Aro flex"> Aro flex</label>
+        <label><input type="checkbox" value="Bastón"> Bastón</label>
+        <label><input type="checkbox" value="Mancuernas"> Mancuernas</label>
+        <label><input type="checkbox" value="Banda flex"> Banda flex</label>
+        <label><input type="checkbox" value="Pelota 20cm"> Pelota 20cm</label>
+        <label><input type="checkbox" value="Pelota 65cm"> Pelota 65cm</label>
+        <label><input type="checkbox" value="Cajón largo"> Cajón largo</label>
+        <label><input type="checkbox" value="Cajón corto"> Cajón corto</label>
+        <label><input type="checkbox" value="Tabla de salto"> Tabla de salto</label>
       </div>
     </div>
     <div class="field">
-      <label>Cue / notas de ejecución</label>
+      <label>Resorte</label>
+      <div class="checkgrid" id="ejercicio-resorte-grid">
+        <label><input type="checkbox" value="amarillo"> <span class="spring"><span class="sw sw-amarillo"></span>Amarillo</span></label>
+        <label><input type="checkbox" value="azul"> <span class="spring"><span class="sw sw-azul"></span>Azul</span></label>
+        <label><input type="checkbox" value="rojo"> <span class="spring"><span class="sw sw-rojo"></span>Rojo</span></label>
+        <label><input type="checkbox" value="doble-rojo"> <span class="spring"><span class="sw sw-doble-rojo"></span>Doble rojo</span></label>
+        <label><input type="checkbox" value="verde"> <span class="spring"><span class="sw sw-verde"></span>Verde</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Ejecución</label>
       <textarea id="ejercicio-cue" placeholder="Indicaciones clave para dar el ejercicio..."></textarea>
     </div>
     <div class="modal-actions">
@@ -504,6 +523,24 @@ async function loadAll(){
     }
     delete a.turnos; delete a.dia; delete a.hora; delete a.ejercicios;
   });
+
+  // migración 3: ejercicios viejos con categoría/resorte único pasan a listas para tildar
+  let cambiosEjercicios = false;
+  const mapaResorteViejo = { suave:'amarillo', medio:'rojo', intenso:'azul' };
+  ejercicios.forEach(e=>{
+    if(!e.categorias){
+      e.categorias = e.categoria ? [e.categoria] : [];
+      delete e.categoria;
+      cambiosEjercicios = true;
+    }
+    if(!e.resortes){
+      e.resortes = e.resorte ? [mapaResorteViejo[e.resorte] || e.resorte] : [];
+      delete e.resorte;
+      cambiosEjercicios = true;
+    }
+    if(!e.nivel){ e.nivel = []; cambiosEjercicios = true; }
+  });
+  if(cambiosEjercicios){ await saveEjercicios(); }
 
   if(cambios){ await saveAlumnas(); await saveClases(); }
 }
@@ -649,10 +686,10 @@ document.getElementById('btn-save-alumna').addEventListener('click', async ()=>{
 });
 
 /* ---------- EJERCICIOS ---------- */
-function springLabel(r){
-  return r==='suave' ? '<span class="spring"><span class="sw sw-suave"></span>Suave</span>'
-    : r==='medio' ? '<span class="spring"><span class="sw sw-medio"></span>Medio</span>'
-    : '<span class="spring"><span class="sw sw-intenso"></span>Intenso</span>';
+const RESORTE_LABELS = { amarillo:'Amarillo', azul:'Azul', rojo:'Rojo', 'doble-rojo':'Doble rojo', verde:'Verde' };
+function springChips(resortes){
+  if(!resortes || resortes.length===0) return '';
+  return resortes.map(r=>`<span class="spring"><span class="sw sw-${r}"></span>${RESORTE_LABELS[r]||r}</span>`).join(' ');
 }
 function renderEjercicios(){
   const list = document.getElementById('lista-ejercicios');
@@ -660,16 +697,18 @@ function renderEjercicios(){
     list.innerHTML = `<div class="empty"><div class="display">El banco de ejercicios está vacío</div>Cargá el primero con "Nuevo ejercicio".</div>`;
     return;
   }
-  const categorias = [...new Set(ejercicios.map(e=>e.categoria))];
-  list.innerHTML = categorias.map(cat=>{
-    const items = ejercicios.filter(e=>e.categoria===cat);
-    return `<div class="cat-heading">${cat}</div>` + items.map(e=>`
+  const ordenados = [...ejercicios].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  list.innerHTML = ordenados.map(e=>`
       <div class="card">
         <div class="card-row">
           <div>
             <h3>${escapeHtml(e.nombre)}</h3>
-            ${springLabel(e.resorte)}
-            <div>${(e.equipo||[]).map(eq=>`<span class="tag">${escapeHtml(eq)}</span>`).join('')}</div>
+            <div>${springChips(e.resortes)}</div>
+            <div style="margin-top:4px;">
+              ${(e.categorias||[]).map(c=>`<span class="tag">${escapeHtml(c)}</span>`).join('')}
+              ${(e.nivel||[]).map(n=>`<span class="tag">${escapeHtml(n)}</span>`).join('')}
+              ${(e.equipo||[]).map(eq=>`<span class="tag">${escapeHtml(eq)}</span>`).join('')}
+            </div>
             ${e.cue? `<div class="notas">${escapeHtml(e.cue)}</div>`:''}
           </div>
           <div class="card-actions">
@@ -678,8 +717,7 @@ function renderEjercicios(){
           </div>
         </div>
       </div>
-    `).join('');
-  }).join('');
+  `).join('');
 }
 function openEjercicioModal(){ document.getElementById('overlay-ejercicio').classList.add('open'); }
 function closeEjercicioModal(){ document.getElementById('overlay-ejercicio').classList.remove('open'); }
@@ -687,9 +725,10 @@ document.getElementById('btn-add-ejercicio').addEventListener('click', ()=>{
   document.getElementById('modal-ejercicio-title').textContent = 'Nuevo ejercicio';
   document.getElementById('ejercicio-id').value='';
   document.getElementById('ejercicio-nombre').value='';
-  document.getElementById('ejercicio-categoria').value='Core';
-  document.getElementById('ejercicio-resorte').value='suave';
+  document.querySelectorAll('#ejercicio-categoria-grid input').forEach(c=>c.checked=false);
+  document.querySelectorAll('#ejercicio-nivel-grid input').forEach(c=>c.checked=false);
   document.querySelectorAll('#ejercicio-equipo-grid input').forEach(c=>c.checked=false);
+  document.querySelectorAll('#ejercicio-resorte-grid input').forEach(c=>c.checked=false);
   document.getElementById('ejercicio-cue').value='';
   openEjercicioModal();
 });
@@ -699,9 +738,10 @@ window.editEjercicio = function(id){
   document.getElementById('modal-ejercicio-title').textContent = 'Editar ejercicio';
   document.getElementById('ejercicio-id').value=e.id;
   document.getElementById('ejercicio-nombre').value=e.nombre;
-  document.getElementById('ejercicio-categoria').value=e.categoria;
-  document.getElementById('ejercicio-resorte').value=e.resorte;
+  document.querySelectorAll('#ejercicio-categoria-grid input').forEach(c=>{ c.checked = (e.categorias||[]).includes(c.value); });
+  document.querySelectorAll('#ejercicio-nivel-grid input').forEach(c=>{ c.checked = (e.nivel||[]).includes(c.value); });
   document.querySelectorAll('#ejercicio-equipo-grid input').forEach(c=>{ c.checked = (e.equipo||[]).includes(c.value); });
+  document.querySelectorAll('#ejercicio-resorte-grid input').forEach(c=>{ c.checked = (e.resortes||[]).includes(c.value); });
   document.getElementById('ejercicio-cue').value=e.cue||'';
   openEjercicioModal();
 }
@@ -716,12 +756,16 @@ document.getElementById('btn-save-ejercicio').addEventListener('click', async ()
   const nombre = document.getElementById('ejercicio-nombre').value.trim();
   if(!nombre){ alert('Poné un nombre.'); return; }
   const id = document.getElementById('ejercicio-id').value || uid();
+  const categorias = [...document.querySelectorAll('#ejercicio-categoria-grid input:checked')].map(c=>c.value);
+  const nivel = [...document.querySelectorAll('#ejercicio-nivel-grid input:checked')].map(c=>c.value);
   const equipo = [...document.querySelectorAll('#ejercicio-equipo-grid input:checked')].map(c=>c.value);
+  const resortes = [...document.querySelectorAll('#ejercicio-resorte-grid input:checked')].map(c=>c.value);
   const data = {
     id, nombre,
-    categoria: document.getElementById('ejercicio-categoria').value,
-    resorte: document.getElementById('ejercicio-resorte').value,
+    categorias,
+    nivel,
     equipo,
+    resortes,
     cue: document.getElementById('ejercicio-cue').value.trim(),
   };
   const idx = ejercicios.findIndex(e=>e.id===id);
@@ -827,7 +871,7 @@ function renderPlan(){
   const rutinaHtml = clase.rutina.map((id,i)=>{
     const e = ejercicios.find(x=>x.id===id);
     if(!e) return '';
-    return `<span class="rutina-chip"><b class="mono">${i+1}.</b> ${escapeHtml(e.nombre)} ${springLabel(e.resorte)}
+    return `<span class="rutina-chip"><b class="mono">${i+1}.</b> ${escapeHtml(e.nombre)} ${springChips(e.resortes)}
       <span class="ops">
         <button onclick="moverEjercicio('${id}',-1)" title="Subir">↑</button>
         <button onclick="moverEjercicio('${id}',1)" title="Bajar">↓</button>
@@ -836,19 +880,15 @@ function renderPlan(){
     </span>`;
   }).join('') || `<div class="meta">Todavía no armaste la rutina de esta clase.</div>`;
 
-  const categorias = [...new Set(ejercicios.map(e=>e.categoria))];
   let poolEjerciciosHtml = '';
   if(ejercicios.length===0){
     poolEjerciciosHtml = `<div class="meta">Cargá ejercicios en la sección "Ejercicios" primero.</div>`;
   }else{
-    poolEjerciciosHtml = categorias.map(cat=>{
-      const items = ejercicios.filter(e=>e.categoria===cat && !clase.rutina.includes(e.id));
-      if(items.length===0) return '';
-      return `<div class="cat-heading" style="margin:14px 0 6px;">${cat}</div><div class="pool">` + items.map(e=>`
+    const disponiblesEjercicios = [...ejercicios].filter(e=>!clase.rutina.includes(e.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    poolEjerciciosHtml = disponiblesEjercicios.length ? `<div class="pool">` + disponiblesEjercicios.map(e=>`
         <div class="pool-item" draggable="true" ondragstart="onDragStartEjercicio(event,'${e.id}')" onclick="agregarEjercicioAClase('${e.id}')">
-          ${escapeHtml(e.nombre)} ${springLabel(e.resorte)}
-        </div>`).join('') + `</div>`;
-    }).join('');
+          ${escapeHtml(e.nombre)} ${springChips(e.resortes)}
+        </div>`).join('') + `</div>` : `<div class="meta">Ya agregaste todos los ejercicios cargados.</div>`;
   }
 
   const [y,m,d] = fechaSeleccionada.split('-');
