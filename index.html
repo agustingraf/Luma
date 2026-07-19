@@ -136,6 +136,19 @@
     padding:3px 8px; border-radius:6px; margin:2px 4px 0 0;
   }
 
+  .buscador{
+    position:relative; margin-bottom:16px; max-width:360px;
+  }
+  .buscador svg{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    width:17px; height:17px; color:var(--ink-soft); pointer-events:none;
+  }
+  .buscador input{
+    width:100%; padding:11px 14px 11px 40px; border-radius:11px; border:1px solid var(--border);
+    background:var(--surface); font-family:'Inter',sans-serif; font-size:14px; color:var(--ink);
+  }
+  .buscador input:focus{ outline:none; border-color:var(--plum); }
+
   .filtro-bar{
     position:sticky; top:0; z-index:10; background:rgba(253,250,248,0.94); backdrop-filter:blur(6px);
     display:flex; flex-wrap:wrap; gap:8px; padding:10px 0 14px; margin-bottom:6px; border-bottom:1px solid var(--border);
@@ -258,6 +271,13 @@
   .pool-item:hover{ background:var(--eucalipto-soft); border-color:var(--eucalipto); }
   .pool-item[draggable="true"]{ cursor:grab; }
 
+  #select-agregar-alumna, #select-agregar-ejercicio{
+    width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--border);
+    background:var(--surface); font-family:'Inter',sans-serif; font-size:14px; color:var(--ink);
+    cursor:pointer; margin-top:4px;
+  }
+  #select-agregar-alumna:focus, #select-agregar-ejercicio:focus{ outline:none; border-color:var(--plum); }
+
   .dropzone{
     border:1.5px dashed var(--border); border-radius:12px; padding:12px; margin-bottom:14px; transition:border-color .15s, background .15s;
   }
@@ -342,6 +362,13 @@
           <p>Ficha de cada alumna, con el historial de clases que se va guardando solo.</p>
         </div>
         <button class="btn btn-primary" id="btn-add-alumna">+ Nueva alumna</button>
+      </div>
+      <div class="buscador">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <line x1="16.2" y1="16.2" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="buscar-alumna" placeholder="Buscar alumna por nombre...">
       </div>
       <div id="lista-alumnas"></div>
     </section>
@@ -714,13 +741,19 @@ function toggleHistorial(id){
   if(historialAbierto.has(id)) historialAbierto.delete(id); else historialAbierto.add(id);
   renderAlumnas();
 }
+let busquedaAlumna = '';
 function renderAlumnas(){
   const list = document.getElementById('lista-alumnas');
   if(alumnas.length===0){
     list.innerHTML = `<div class="empty"><div class="display">Todavía no hay alumnas cargadas</div>Sumá la primera con "Nueva alumna".</div>`;
     return;
   }
-  const ordenadas = [...alumnas].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const coincidentes = alumnas.filter(a=>normalizar(a.nombre).includes(normalizar(busquedaAlumna)));
+  if(coincidentes.length===0){
+    list.innerHTML = `<div class="empty"><div class="display">Ninguna alumna coincide</div>Probá con otro nombre.</div>`;
+    return;
+  }
+  const ordenadas = [...coincidentes].sort((a,b)=>a.nombre.localeCompare(b.nombre));
   list.innerHTML = ordenadas.map(a=>{
     const historial = clasesDeAlumna(a.id);
     const abierto = historialAbierto.has(a.id);
@@ -771,6 +804,10 @@ window.quitarDeClaseHistorial = async function(alumnaId, clave, instr){
 }
 function openAlumnaModal(){ document.getElementById('overlay-alumna').classList.add('open'); }
 function closeAlumnaModal(){ document.getElementById('overlay-alumna').classList.remove('open'); }
+document.getElementById('buscar-alumna').addEventListener('input', (e)=>{
+  busquedaAlumna = e.target.value;
+  renderAlumnas();
+});
 document.getElementById('btn-add-alumna').addEventListener('click', ()=>{
   document.getElementById('modal-alumna-title').textContent = 'Nueva alumna';
   document.getElementById('alumna-id').value='';
@@ -1054,9 +1091,12 @@ function renderPlan(){
     return `<span class="alumna-chip">${escapeHtml(a.nombre)}<button onclick="quitarAlumnaDeClase('${id}')" title="Sacar de la clase">✕</button></span>`;
   }).join('') || `<div class="meta">Todavía no cargaste alumnas en esta clase.</div>`;
 
-  const disponibles = alumnas.filter(a=>!clase.alumnas.includes(a.id));
-  const poolAlumnasHtml = disponibles.length
-    ? disponibles.map(a=>`<div class="pool-item" onclick="agregarAlumnaAClase('${a.id}')">${escapeHtml(a.nombre)} <span class="meta" style="margin:0;">${a.nivel}</span></div>`).join('')
+  const disponibles = [...alumnas].filter(a=>!clase.alumnas.includes(a.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const selectAlumnasHtml = disponibles.length
+    ? `<select id="select-agregar-alumna">
+        <option value="" disabled selected>+ Agregar alumna...</option>
+        ${disponibles.map(a=>`<option value="${a.id}">${escapeHtml(a.nombre)} — ${a.nivel}</option>`).join('')}
+      </select>`
     : `<div class="meta">No quedan más alumnas cargadas para sumar.</div>`;
 
   const rutinaHtml = clase.rutina.map((id,i)=>{
@@ -1071,15 +1111,17 @@ function renderPlan(){
     </span>`;
   }).join('') || `<div class="meta">Todavía no armaste la rutina de esta clase.</div>`;
 
-  let poolEjerciciosHtml = '';
+  const disponiblesEjercicios = [...ejercicios].filter(e=>!clase.rutina.includes(e.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  let selectEjerciciosHtml;
   if(ejercicios.length===0){
-    poolEjerciciosHtml = `<div class="meta">Cargá ejercicios en la sección "Ejercicios" primero.</div>`;
+    selectEjerciciosHtml = `<div class="meta">Cargá ejercicios en la sección "Ejercicios" primero.</div>`;
+  }else if(disponiblesEjercicios.length===0){
+    selectEjerciciosHtml = `<div class="meta">Ya agregaste todos los ejercicios cargados.</div>`;
   }else{
-    const disponiblesEjercicios = [...ejercicios].filter(e=>!clase.rutina.includes(e.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    poolEjerciciosHtml = disponiblesEjercicios.length ? `<div class="pool">` + disponiblesEjercicios.map(e=>`
-        <div class="pool-item" draggable="true" ondragstart="onDragStartEjercicio(event,'${e.id}')" onclick="agregarEjercicioAClase('${e.id}')">
-          ${escapeHtml(e.nombre)} ${springChips(e.resortes)}
-        </div>`).join('') + `</div>` : `<div class="meta">Ya agregaste todos los ejercicios cargados.</div>`;
+    selectEjerciciosHtml = `<select id="select-agregar-ejercicio">
+        <option value="" disabled selected>+ Agregar ejercicio...</option>
+        ${disponiblesEjercicios.map(e=>`<option value="${e.id}">${escapeHtml(e.nombre)}</option>`).join('')}
+      </select>`;
   }
 
   const [y,m,d] = fechaSeleccionada.split('-');
@@ -1094,20 +1136,13 @@ function renderPlan(){
     <div class="planblock">
       <h3>Alumnas en esta clase</h3>
       <div class="chiprow">${asignadasHtml}</div>
-      <div class="cat-heading" style="margin-top:6px;">Agregar alumna</div>
-      <div class="pool">${poolAlumnasHtml}</div>
+      ${selectAlumnasHtml}
     </div>
 
     <div class="planblock">
       <h3>Rutina de la clase</h3>
-      <div class="dropzone" id="rutina-dropzone"
-           ondragover="event.preventDefault(); event.currentTarget.classList.add('drag-over')"
-           ondragleave="event.currentTarget.classList.remove('drag-over')"
-           ondrop="onDropRutina(event)">
-        <div class="chiprow">${rutinaHtml}</div>
-      </div>
-      <div class="cat-heading" style="margin-top:6px;">Banco de ejercicios (arrastrá o tocá para agregar)</div>
-      ${poolEjerciciosHtml}
+      <div class="chiprow">${rutinaHtml}</div>
+      ${selectEjerciciosHtml}
     </div>
 
     <div class="field">
@@ -1115,6 +1150,11 @@ function renderPlan(){
       <textarea id="clase-notas" placeholder="Observaciones para esta clase...">${escapeHtml(clase.notas||'')}</textarea>
     </div>
   `;
+
+  const selAlumna = document.getElementById('select-agregar-alumna');
+  if(selAlumna) selAlumna.addEventListener('change', (e)=>{ agregarAlumnaAClase(e.target.value); });
+  const selEjercicio = document.getElementById('select-agregar-ejercicio');
+  if(selEjercicio) selEjercicio.addEventListener('change', (e)=>{ agregarEjercicioAClase(e.target.value); });
 
   document.getElementById('clase-notas').addEventListener('change', async (e)=>{
     const c = ensureClase(fechaSeleccionada, horaSeleccionada);
